@@ -29,6 +29,11 @@ func CriaNovoAluno(c *gin.Context) {
 			"erro": err.Error()})
 		return
 	}
+	if err := models.ValidaDadosDeAluno(&aluno); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"erro": err.Error()})
+		return
+	}
 	database.DB.Create(&aluno)
 	c.JSON(http.StatusOK, aluno)
 }
@@ -62,7 +67,11 @@ func EditaAluno(c *gin.Context) {
 			"Not found": "Aluno não encontrado"})
 		return
 	}
-
+	if err := models.ValidaDadosDeAluno(&aluno); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"erro": err.Error()})
+		return
+	}
 	if err := c.ShouldBindJSON(&aluno); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error()})
@@ -83,4 +92,17 @@ func BuscaAlunoPorCPF(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, aluno)
+}
+
+func ExibePaginaIndex(c *gin.Context) {
+	var alunos []models.Aluno
+	database.DB.Find(&alunos)
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"alunos": alunos,
+	})
+}
+
+func RotaNaoEncontrada(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "404.html", nil)
+
 }
